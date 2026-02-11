@@ -58,17 +58,8 @@ function logout() {
 
 document.addEventListener("DOMContentLoaded", () => {
   // Registration form logic
-  let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
-  const adminExists = accounts.some(acc => acc.email === "admin@example.com");
-  if (!adminExists) { accounts.push({firstname: "Admin", lastname: "User",
-    email: "admin@example.com", password: "123456789",
-    verified: true,  
-    role: "Admin"
-    });
-    localStorage.setItem("accounts", JSON.stringify(accounts)); console.log("Default admin account created.");
-    const registerForm = document.getElementById("registerForm");
-  }
-    if (registerForm) {
+  const registerForm = document.getElementById("registerForm");
+  if (registerForm) {
     registerForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
@@ -245,6 +236,40 @@ function deleteEmployee(index) {
     renderEmployees();
   }
 }
+const STORAGE_KEY = 'ipt_demo_v1';
+
+function loadFromStorage() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (data && data.accounts && data.departments) {
+      window.db = data;
+      return;
+    }
+  } catch (e) {
+    console.warn("Storage empty or corrupt, seeding defaults.");
+  }
+
+  // Seed defaults
+  window.db = {
+    accounts: [
+      {
+        firstname: "Admin",
+        lastname: "User",
+        email: "admin@example.com",
+        password: "Password123!",
+        verified: true,
+        role: "Admin"
+      }
+    ],
+    employees: [],
+    departments: ["Engineering", "HR"]
+  };
+  saveToStorage();
+}
+
+function saveToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(window.db));
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const empForm = document.getElementById("empForm");
@@ -260,6 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (employeesSection) {
     employeesSection.addEventListener("show", renderEmployees);
   }
-    });
+  });
   }
 });
