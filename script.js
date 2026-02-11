@@ -10,15 +10,10 @@ function navigateTo(sectionId) {
     document.getElementById("profileEmail").textContent = window.currentAccount.email;
     document.getElementById("profileRole").textContent = window.currentAccount.role;
   }
-
-  // Refresh employees list when navigating to Employees
-  if (sectionId === "employees") {
-    renderEmployees();
-  }
 }
 
 function showUserDropdown(account) {
-  window.currentAccount = account;
+  window.currentAccount = account; // track logged-in user
   const authLinks = document.getElementById("authLinks");
 
   authLinks.innerHTML = `
@@ -28,19 +23,24 @@ function showUserDropdown(account) {
         ${account.role === "Admin" ? "Admin" : account.firstname}
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+        <!-- Always visible when logged in -->
         <li><a class="dropdown-item" href="#" onclick="navigateTo('profile')">Profile</a></li>
         <li><a class="dropdown-item" href="#" onclick="navigateTo('requests')">My Requests</a></li>
+
+        <!-- Admin-only links -->
         ${account.role === "Admin" ? `
           <li><a class="dropdown-item role-admin" href="#" onclick="navigateTo('employees')">Employees</a></li>
           <li><a class="dropdown-item role-admin" href="#" onclick="navigateTo('accounts')">Accounts</a></li>
           <li><a class="dropdown-item role-admin" href="#" onclick="navigateTo('departments')">Departments</a></li>
         ` : ""}
+
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
       </ul>
     </li>
   `;
 }
+
 
 function logout() {
   window.currentAccount = null;
@@ -56,18 +56,19 @@ function logout() {
   navigateTo("home");
 }
 
-// -------------------- Accounts in localStorage --------------------
-function getAccounts() {
-  return JSON.parse(localStorage.getItem("accounts")) || [];
-}
-function saveAccounts(accounts) {
-  localStorage.setItem("accounts", JSON.stringify(accounts));
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Registration
-  const registerForm = document.getElementById("registerForm");
-  if (registerForm) {
+  // Registration form logic
+  let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+  const adminExists = accounts.some(acc => acc.email === "admin@example.com");
+  if (!adminExists) { accounts.push({firstname: "Admin", lastname: "User",
+    email: "admin@example.com", password: "123456789",
+    verified: true,  
+    role: "Admin"
+    });
+    localStorage.setItem("accounts", JSON.stringify(accounts)); console.log("Default admin account created.");
+    const registerForm = document.getElementById("registerForm");
+  }
+    if (registerForm) {
     registerForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
@@ -85,24 +86,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      let accounts = getAccounts();
-      const exists = accounts.some(acc => acc.email === email);
+      if (!window.db) window.db = { accounts: [] };
+      const exists = window.db.accounts.some(acc => acc.email === email);
       if (exists) {
         alert("Email already registered.");
         return;
       }
 
+      // Default role: Admin if email is admin@example.com, else User
       const role = email === "admin@example.com" ? "Admin" : "User";
-      accounts.push({ firstname, lastname, email, password, verified: false, role });
-      saveAccounts(accounts);
 
+      window.db.accounts.push({ firstname, lastname, email, password, verified: false, role });
       localStorage.setItem("unverified_email", email);
+
       navigateTo("verify-email");
       document.getElementById("verificationMessage").textContent = `Verification sent to ${email}`;
     });
   }
 
-  // Verification
+  // Verification logic
   const verifyBtn = document.getElementById("verifyBtn");
   if (verifyBtn) {
     verifyBtn.addEventListener("click", () => {
@@ -112,11 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      let accounts = getAccounts();
-      const account = accounts.find(acc => acc.email === email);
+      const account = window.db.accounts.find(acc => acc.email === email);
       if (account) {
         account.verified = true;
-        saveAccounts(accounts);
         alert(`Email ${email} verified successfully!`);
         localStorage.removeItem("unverified_email");
         navigateTo("login");
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Login
+  // Login logic
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
@@ -136,12 +136,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value.trim();
 
-      let accounts = getAccounts();
-      const account = accounts.find(acc => acc.email === email && acc.password === password);
+      if (!window.db || !window.db.accounts) {
+        alert("No accounts found. Please register first.");
+        return;
+      }
+
+      const account = window.db.accounts.find(acc => acc.email === email && acc.password === password);
       if (!account) {
         alert("Invalid email or password.");
         return;
       }
+
       if (!account.verified) {
         alert("Please verify your email before logging in.");
         return;
@@ -150,26 +155,17 @@ document.addEventListener("DOMContentLoaded", () => {
       showUserDropdown(account);
       navigateTo("profile");
     });
-  }
-
-  // -------------------- Employees in localStorage --------------------
-  const empForm = document.getElementById("empForm");
-  if (empForm) {
-    empForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      saveEmployee();
-    });
-  }
-});
-
-// Employees helpers
+    // Utility: get employees from localStorage
 function getEmployees() {
   return JSON.parse(localStorage.getItem("employees")) || [];
 }
+
+// Utility: save employees to localStorage
 function saveEmployees(employees) {
   localStorage.setItem("employees", JSON.stringify(employees));
 }
 
+// Render employees table
 function renderEmployees() {
   const tableBody = document.getElementById("employeesTableBody");
   if (!tableBody) return;
@@ -198,6 +194,7 @@ function renderEmployees() {
   });
 }
 
+// Add/Edit employee
 function saveEmployee() {
   const id = document.getElementById("empId").value.trim();
   const email = document.getElementById("empEmail").value.trim();
@@ -214,9 +211,11 @@ function saveEmployee() {
   const editingIndex = document.getElementById("empForm").dataset.editIndex;
 
   if (editingIndex !== undefined && editingIndex !== "") {
+    // Update existing
     employees[editingIndex] = { id, email, position, department, hireDate };
     document.getElementById("empForm").dataset.editIndex = "";
   } else {
+    // Add new
     employees.push({ id, email, position, department, hireDate });
   }
 
@@ -225,6 +224,7 @@ function saveEmployee() {
   document.getElementById("empForm").reset();
 }
 
+// Edit employee
 function editEmployee(index) {
   const employees = getEmployees();
   const emp = employees[index];
@@ -236,6 +236,7 @@ function editEmployee(index) {
   document.getElementById("empForm").dataset.editIndex = index;
 }
 
+// Delete employee
 function deleteEmployee(index) {
   let employees = getEmployees();
   if (confirm("Are you sure you want to delete this employee?")) {
@@ -244,3 +245,21 @@ function deleteEmployee(index) {
     renderEmployees();
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const empForm = document.getElementById("empForm");
+  if (empForm) {
+    empForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saveEmployee();
+    });
+  }
+
+  // Render employees when navigating to Employees section
+  const employeesSection = document.getElementById("employees");
+  if (employeesSection) {
+    employeesSection.addEventListener("show", renderEmployees);
+  }
+    });
+  }
+});
