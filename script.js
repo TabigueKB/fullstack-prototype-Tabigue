@@ -1,14 +1,27 @@
 function navigateTo(sectionId) {
-  document.querySelectorAll("main section").forEach(sec => sec.classList.add("d-none"));
+  const STORAGE_KEY = "ipt_demo_v2";
+  document.querySelectorAll("main section")
+ .forEach(sec => sec.classList.add("d-none"));
+
   const target = document.getElementById(sectionId);
   if (target) target.classList.remove("d-none");
 
-  // Update profile info when navigating to profile
   if (sectionId === "profile" && window.currentAccount) {
-    document.getElementById("profileName").textContent =
+    profileName.textContent =
       `${window.currentAccount.firstname} ${window.currentAccount.lastname}`;
-    document.getElementById("profileEmail").textContent = window.currentAccount.email;
-    document.getElementById("profileRole").textContent = window.currentAccount.role;
+    profileEmail.textContent = window.currentAccount.email;
+    profileRole.textContent = window.currentAccount.role;
+  }
+  if (sectionId === "employees") {
+    renderEmployees();
+
+    function showSection(sectionId) {
+  document.querySelectorAll("section").forEach(section => {
+    section.classList.add("d-none");
+  });
+
+  document.getElementById(sectionId).classList.remove("d-none");
+}
   }
 }
 
@@ -147,8 +160,11 @@ document.addEventListener("DOMContentLoaded", () => {
       navigateTo("profile");
     });
     // Utility: get employees from localStorage
-function getEmployees() {
-  return JSON.parse(localStorage.getItem("employees")) || [];
+  function getEmployees() {
+  if (!window.db.employees) {
+    window.db.employees = [];
+  }
+  return window.db.employees;
 }
 
 // Utility: save employees to localStorage
@@ -165,7 +181,8 @@ function renderEmployees() {
   tableBody.innerHTML = "";
 
   if (employees.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" class="text-center">No employees.</td></tr>`;
+    tableBody.innerHTML =
+      `<tr><td colspan="5" class="text-center">No employees.</td></tr>`;
     return;
   }
 
@@ -177,94 +194,124 @@ function renderEmployees() {
         <td>${emp.position}</td>
         <td>${emp.department}</td>
         <td>
-          <button class="btn btn-sm btn-primary" onclick="editEmployee(${index})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteEmployee(${index})">Delete</button>
+          <button class="btn btn-sm btn-primary"
+            onclick="editEmployee(${index})">Edit</button>
+          <button class="btn btn-sm btn-danger"
+            onclick="deleteEmployee(${index})">Delete</button>
         </td>
       </tr>
     `;
   });
+
+  window.db.employees.forEach((emp, index) => {
+    const row = `
+      <tr>
+        <td>${emp.id}</td>
+        <td>${emp.email}</td>
+        <td>${emp.position}</td>
+        <td>${emp.department}</td>
+        <td>
+          <button class="btn btn-sm btn-primary"
+            onclick="editEmployee(${index})">Edit</button>
+          <button class="btn btn-sm btn-danger"
+            onclick="deleteEmployee(${index})">Delete</button>
+        </td>
+      </tr>
+    `;
+    tableBody.innerHTML += row;
+  });
 }
 
-// Add/Edit employee
 function saveEmployee() {
   const id = document.getElementById("empId").value.trim();
   const email = document.getElementById("empEmail").value.trim();
   const position = document.getElementById("empPosition").value.trim();
-  const department = document.getElementById("empDepartment").value.trim();
-  const hireDate = document.getElementById("empHireDate").value.trim();
+  const department = document.getElementById("empDepartment").value;
+  const hireDate = document.getElementById("empHireDate").value;
 
   if (!id || !email || !position || !department || !hireDate) {
     alert("Please fill in all fields.");
     return;
   }
 
-  let employees = getEmployees();
-  const editingIndex = document.getElementById("empForm").dataset.editIndex;
+  const employees = getEmployees();
+  const form = document.getElementById("empForm");
+  const editingIndex = form.dataset.editIndex;
 
-  if (editingIndex !== undefined && editingIndex !== "") {
-    // Update existing
+  if (editingIndex) {
     employees[editingIndex] = { id, email, position, department, hireDate };
-    document.getElementById("empForm").dataset.editIndex = "";
+    form.dataset.editIndex = "";
   } else {
-    // Add new
     employees.push({ id, email, position, department, hireDate });
   }
 
-  saveEmployees(employees);
-  renderEmployees();
-  document.getElementById("empForm").reset();
+  saveToStorage();     // ✅ your required function
+  renderEmployees();   // ✅ instantly update table
+  form.reset();
 }
 
-// Edit employee
 function editEmployee(index) {
-  const employees = getEmployees();
-  const emp = employees[index];
+  const emp = getEmployees()[index];
+
   document.getElementById("empId").value = emp.id;
   document.getElementById("empEmail").value = emp.email;
   document.getElementById("empPosition").value = emp.position;
   document.getElementById("empDepartment").value = emp.department;
   document.getElementById("empHireDate").value = emp.hireDate;
+
   document.getElementById("empForm").dataset.editIndex = index;
 }
 
-// Delete employee
 function deleteEmployee(index) {
-  let employees = getEmployees();
-  if (confirm("Are you sure you want to delete this employee?")) {
-    employees.splice(index, 1);
-    saveEmployees(employees);
-    renderEmployees();
-  }
+  if (!confirm("Delete this employee?")) return;
+
+  const employees = getEmployees();
+  employees.splice(index, 1);
+
+  saveToStorage();
+  renderEmployees();
+}
+
+function showEmployeeForm() {
+  document.getElementById("employeeFormContainer")
+    .classList.remove("d-none");
+}
+
+function hideEmployeeForm() {
+  document.getElementById("employeeFormContainer")
+    .classList.add("d-none");
 }
 const STORAGE_KEY = 'ipt_demo_v1';
 
 function loadFromStorage() {
-  try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (data && data.accounts && data.departments) {
-      window.db = data;
-      return;
-    }
-  } catch (e) {
-    console.warn("Storage empty or corrupt, seeding defaults.");
-  }
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
-  // Seed defaults
-  window.db = {
-    accounts: [
-      {
-        firstname: "Admin",
-        lastname: "User",
-        email: "admin@example.com",
-        password: "Password123!",
-        verified: true,
-        role: "Admin"
-      }
-    ],
-    employees: [],
-    departments: ["Engineering", "HR"]
-  };
-  saveToStorage();
+  if (data) {
+    window.db = data;
+  } else {
+    window.db = {
+      accounts: [
+        {
+          firstname: "Admin",
+          lastname: "User",
+          email: "admin@example.com",
+          password: "Password123!",
+          verified: true,
+          role: "Admin"
+        }
+      ],
+      employees: [],
+      departments: [
+        "Engineering",
+        "Human Resources",
+        "Finance",
+        "Marketing",
+        "IT Support",
+        "Operations"
+      ]
+    };
+    saveToStorage();
+  }
 }
 
 function saveToStorage() {
@@ -272,13 +319,50 @@ function saveToStorage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const empForm = document.getElementById("empForm");
-  if (empForm) {
-    empForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      saveEmployee();
-    });
-  }
+
+loadFromStorage();
+renderEmployees();
+
+const empForm = document.getElementById("empForm");
+if (empForm) {
+  empForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    saveEmployee();
+  });
+}
+
+function loadEmployees() {
+  const employees = JSON.parse(localStorage.getItem("employees")) || [];
+  const tableBody = document.getElementById("employeeTableBody");
+
+  tableBody.innerHTML = "";
+
+  employees.forEach((emp, index) => {
+    const row = `
+      <tr>
+        <td>${emp.name}</td>
+        <td>${emp.position}</td>
+        <td>${emp.email}</td>
+      </tr>
+    `;
+    tableBody.innerHTML += row;
+  });
+}
+
+function addEmployee() {
+  const name = document.getElementById("employeeName").value;
+  const position = document.getElementById("employeePosition").value;
+  const email = document.getElementById("employeeEmail").value;
+
+  const employees = JSON.parse(localStorage.getItem("employees")) || [];
+
+  employees.push({ name, position, email });
+
+  localStorage.setItem("employees", JSON.stringify(employees));
+
+  loadEmployees();
+  hideEmployeeForm();
+}
 
   // Render employees when navigating to Employees section
   const employeesSection = document.getElementById("employees");
