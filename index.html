@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,19 +119,24 @@
     </section>
 
     <!-- Employees Section -->
-  <section id="employees" class="py-5 d-none">
+<section id="employees" class="py-5 d-none">
   <div class="container mt-5">
-    <h2>Employees</h2>
-    <p>Admin-only section to manage employees.</p>
-    
-    <button class="btn btn-success mb-3" onclick="document.getElementById('empForm').reset();">+ Add Employee
-    </button>
+
+    <!-- Header Row -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Employees</h2>
+      <button class="btn btn-success"
+        onclick="document.getElementById('empForm').reset();">
+        + Add Employee
+      </button>
     </div>
 
+    <!-- Table -->
     <table class="table table-bordered table-striped">
       <thead class="table-dark">
         <tr>
           <th>ID</th>
+          <th>Name</th>
           <th>User Email</th>
           <th>Position</th>
           <th>Department</th>
@@ -139,52 +145,63 @@
       </thead>
       <tbody id="employeesTableBody">
         <tr>
-          <td colspan="5" class="text-center">No employees.</td>
+          <td colspan="6" class="text-center">No employees.</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Hidden Form Card -->
-      <h5 class="mb-3">Add/Edit Employee</h5>
+    <!-- Employee Form Card -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Add/Edit Employee</h5>
 
-      <form id="empForm">
-        <div class="mb-3">
-          <label class="form-label">Employee ID</label>
-          <input type="text" class="form-control" id="empId">
-        </div>
+        <form id="empForm">
+          <div class="mb-3">
+            <label class="form-label">Employee ID</label>
+            <input type="text" class="form-control" id="empId">
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label">User Email</label>
-          <input type="email" class="form-control" id="empEmail">
-        </div>
+          <div class="mb-3">
+            <label class="form-label">Employee Name</label>
+            <input type="text" class="form-control" id="empName">
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label">Position</label>
-          <input type="text" class="form-control" id="empPosition">
-        </div>
+          <div class="mb-3">
+            <label class="form-label">User Email</label>
+            <input type="email" class="form-control" id="empEmail">
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label">Department</label>
-          <select class="form-select" id="empDepartment">
-            <option value="">Select Department</option>
-            <option>Engineering</option>
-            <option>Human Resources</option>
-            <option>Finance</option>
-            <option>Marketing</option>
-            <option>IT Support</option>
-            <option>Operations</option>
-          </select>
-        </div>
+          <div class="mb-3">
+            <label class="form-label">Position</label>
+            <input type="text" class="form-control" id="empPosition">
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label">Hire Date</label>
-          <input type="date" class="form-control" id="empHireDate">
-        </div>
+          <div class="mb-3">
+            <label class="form-label">Department</label>
+            <select class="form-select" id="empDepartment">
+              <option value="">Select Department</option>
+              <option>Engineering</option>
+              <option>Human Resources</option>
+              <option>Finance</option>
+              <option>Marketing</option>
+              <option>IT Support</option>
+              <option>Operations</option>
+            </select>
+          </div>
 
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" class="btn btn-secondary" onclick="hideEmployeeForm()">Cancel</button>
-      </form>
-    </div>
+          <div class="mb-3">
+            <label class="form-label">Hire Date</label>
+            <input type="date" class="form-control" id="empHireDate">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary"
+            onclick="document.getElementById('empForm').reset();">
+            Cancel
+          </button>
+        </form>
+
+      </div>
 </section>
 
 
