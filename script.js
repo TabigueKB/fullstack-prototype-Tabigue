@@ -21,6 +21,13 @@ function navigateTo(sectionId) {
   if (sectionId === "employees") {
     renderEmployees();
   }
+  if (sectionId === "employees") {
+  renderEmployees();
+}
+if (sectionId === "requests") {
+  renderRequests();
+}
+
 }
 
 /* =========================
@@ -88,7 +95,8 @@ function loadFromStorage() {
         { id: 5, name: "IT Support" },
         { id: 6, name: "Operations" }
 
-      ]
+      ],
+      requests: []
     };
   }
 
@@ -182,6 +190,8 @@ function saveEmployee() {
   document.getElementById("empForm").reset();
 }
 
+function saveEmployee() {
+  const id = document.getElementById("empId").value.trim();
   const name = document.getElementById("empName").value.trim();
   const email = document.getElementById("empEmail").value.trim();
   const position = document.getElementById("empPosition").value.trim();
@@ -219,6 +229,7 @@ function saveEmployee() {
   saveToStorage();
   renderEmployees();
   form.reset();
+}
 
 function editEmployee(index) {
   const emp = window.db.employees[index];
@@ -260,7 +271,7 @@ function renderDepartments() {
   window.db.departments.forEach((dept, index) => {
     tableBody.innerHTML += `
       <tr>
-        <td>${dept}</td>
+        <td>${dept.name}</td>
         <td>—</td>
         <td>
           <button class="btn btn-sm btn-primary"
@@ -272,6 +283,7 @@ function renderDepartments() {
     `;
   });
 }
+
 
 /* DELETE FUNCTION — OUTSIDE */
 function deleteDepartment(index) {
@@ -300,7 +312,7 @@ function updateDepartmentDropdown() {
 
   window.db.departments.forEach(dept => {
     dropdown.innerHTML += `
-      <option value="${dept}">${dept}</option>
+      <option value="${dept.name}">${dept.name}</option>
     `;
   });
 }
@@ -411,7 +423,122 @@ function deleteAccount(index) {
   saveToStorage();
   renderAccounts();
 }
+/* =========================
+   DYNAMIC ITEM FIELDS
+========================= */
+function addItemField(name = "", qty = 1) {
+  const container = document.getElementById("itemsContainer");
+  if (!container) return;
 
+  const div = document.createElement("div");
+  div.className = "d-flex mb-2";
+
+  div.innerHTML = `
+    <input type="text" class="form-control me-2 item-name"
+           placeholder="Item name" value="${name}">
+    <input type="number" class="form-control me-2 item-qty"
+           style="width:90px" min="1" value="${qty}">
+    <button type="button"
+            class="btn btn-danger btn-sm"
+            onclick="this.parentElement.remove()">
+      ×
+    </button>
+  `;
+
+  container.appendChild(div);
+}
+
+
+function renderRequests() {
+  const tableBody = document.getElementById("requestsTableBody");
+  if (!tableBody) return;
+
+  const currentUser = window.currentAccount;
+  if (!currentUser) return;
+
+  const userRequests = window.db.requests.filter(
+    req => req.employeeEmail === currentUser.email
+  );
+
+  tableBody.innerHTML = "";
+
+  if (userRequests.length === 0) {
+    tableBody.innerHTML =
+      `<tr><td colspan="4" class="text-center">No requests yet.</td></tr>`;
+    return;
+  }
+
+  userRequests.forEach(req => {
+
+    let badgeClass = "secondary";
+    if (req.status === "Pending") badgeClass = "warning";
+    if (req.status === "Approved") badgeClass = "success";
+    if (req.status === "Rejected") badgeClass = "danger";
+
+    const itemsText = req.items.map(i => `${i.name} (${i.qty})`).join(", ");
+
+    tableBody.innerHTML += `
+      <tr>
+        <td>${req.date}</td>
+        <td>${req.type}</td>
+        <td>${itemsText}</td>
+        <td><span class="badge bg-${badgeClass}">${req.status}</span></td>
+      </tr>
+    `;
+  });
+}
+
+function saveRequest(e) {
+  e.preventDefault();
+
+  const type = document.getElementById("requestType").value;
+  const itemNames = document.querySelectorAll(".item-name");
+  const itemQtys = document.querySelectorAll(".item-qty");
+
+  if (!type) {
+    alert("Please select request type.");
+    return;
+  }
+
+  let items = [];
+
+  for (let i = 0; i < itemNames.length; i++) {
+    const name = itemNames[i].value.trim();
+    const qty = parseInt(itemQtys[i].value);
+
+    if (name && qty > 0) {
+      items.push({ name, qty });
+    }
+  }
+
+  if (items.length === 0) {
+    alert("Please add at least one item.");
+    return;
+  }
+
+ if (!window.currentAccount) {
+  alert("You must be logged in.");
+  return;
+}
+
+window.db.requests.push({
+  type,
+  items,
+  status: "Pending",
+  date: new Date().toLocaleDateString(),
+  employeeEmail: window.currentAccount.email
+});
+
+
+  saveToStorage();
+  renderRequests();
+
+  document.getElementById("requestForm").reset();
+  document.getElementById("itemsContainer").innerHTML = "";
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById("requestModal"));
+  modal.hide();
+}
 
 /* =========================
    DOM LOADED
@@ -427,13 +554,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   const registerForm = document.getElementById("registerForm");
+  const requestForm = document.getElementById("requestForm");
+  const editProfileBtn = document.getElementById("editProfileBtn");
+
+if (editProfileBtn) {
+  editProfileBtn.addEventListener("click", () => {
+
+    if (!window.currentAccount) return;
+
+    const newFirst = prompt(
+      "Enter new first name:",
+      window.currentAccount.firstname
+    );
+
+    const newLast = prompt(
+      "Enter new last name:",
+      window.currentAccount.lastname
+    );
+
+    if (newFirst && newLast) {
+      window.currentAccount.firstname = newFirst;
+      window.currentAccount.lastname = newLast;
+
+      saveToStorage();
+      navigateTo("profile");
+    }
+  });
+}
+
+  if (requestForm) {
+  requestForm.addEventListener("submit", saveRequest);
+}
 
   if (registerForm) {
     registerForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const firstname = firstname.value.trim();
-      const lastname = lastname.value.trim();
+      const firstname = document.getElementById("firstname").value.trim();
+      const lastname = document.getElementById("lastname").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
@@ -489,6 +647,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const requestModal = document.getElementById("requestModal");
+
+if (requestModal) {
+  requestModal.addEventListener("shown.bs.modal", () => {
+    const container = document.getElementById("itemsContainer");
+    container.innerHTML = "";
+    addItemField(); // automatically add first field
+  });
+}
+  /* =========================
+   EMAIL VERIFICATION
+========================= */
+const verifyBtn = document.getElementById("verifyBtn");
+
+if (verifyBtn) {
+  verifyBtn.addEventListener("click", () => {
+
+    // Get last registered account
+    const lastAccount = window.db.accounts[window.db.accounts.length - 1];
+
+    if (!lastAccount) {
+      alert("No account to verify.");
+      return;
+    }
+
+    lastAccount.verified = true;
+
+    saveToStorage();
+
+    alert("Email successfully verified! You can now login.");
+
+    // Show login alert message
+    const loginAlert = document.getElementById("loginAlert");
+    if (loginAlert) {
+      loginAlert.classList.remove("d-none");
+    }
+
+    navigateTo("login");
+  });   
+}
   const empForm = document.getElementById("empForm");
   if (empForm) {
     empForm.addEventListener("submit", function (e) {
