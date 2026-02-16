@@ -114,7 +114,9 @@
         <p><strong>Name:</strong> <span id="profileName"></span></p>
         <p><strong>Email:</strong> <span id="profileEmail"></span></p>
         <p><strong>Role:</strong> <span id="profileRole"></span></p>
-        <button class="btn btn-outline-primary">Edit Profile</button>
+        <button id="editProfileBtn" class="btn btn-outline-primary">
+          Edit Profile
+    </button>
       </div>
     </section>
 
@@ -203,7 +205,6 @@
 
       </div>
 </section>
-
 
     <!-- Accounts Section -->
   <section id="departments" class="py-5 d-none">
@@ -309,18 +310,75 @@
   </div>
 </section>
 
-
-
-
     <!-- My Requests Section -->
-    <section id="requests" class="py-5 d-none">
-      <div class="container mt-5">
-        <h2>My Requests</h2>
-        <p>User section to view and manage requests.</p>
-      </div>
-    </section>
-  </main>
+   <section id="requests" class="py-5 d-none">
+  <div class="container mt-5">
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>My Requests</h2>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#requestModal">
+        + New Request
+      </button>
+    </div>
+
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Items</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="requestsTableBody">
+        <tr>
+          <td colspan="4" class="text-center">No requests yet.</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+ </section>
+                             
+ <div class="modal fade" id="requestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="requestForm">
+
+          <div class="mb-3">
+            <label>Type</label>
+            <select class="form-select" id="requestType">
+              <option value="">Select Type</option>
+              <option>Equipment</option>
+              <option>Leave</option>
+              <option>Resources</option>
+            </select>
+          </div>
+
+          <div id="itemsContainer"></div>
+
+          <button type="button"
+         class="btn btn-sm btn-secondary mb-3" onclick="addItemField()">
+          + Add Item
+          </button>
+
+          <button type="submit" class="btn btn-primary w-100">
+          Submit Request
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  </main>
+      
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
   <script src="script.js"></script>
