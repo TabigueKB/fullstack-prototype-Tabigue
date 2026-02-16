@@ -80,18 +80,19 @@ function loadFromStorage() {
       accounts: [],
       employees: [],
       departments: [
+
         { id: 1, name: "Engineering" },
         { id: 2, name: "Human Resources" },
         { id: 3, name: "Finance" },
         { id: 4, name: "Marketing" },
         { id: 5, name: "IT Support" },
         { id: 6, name: "Operations" }
+
       ]
     };
   }
 
   saveToStorage();
-
   // Ensure admin always exists
   const adminExists = window.db.accounts.some(
     acc => acc.email === "admin@example.com"
@@ -181,6 +182,43 @@ function saveEmployee() {
   document.getElementById("empForm").reset();
 }
 
+  const name = document.getElementById("empName").value.trim();
+  const email = document.getElementById("empEmail").value.trim();
+  const position = document.getElementById("empPosition").value.trim();
+  const department = document.getElementById("empDepartment").value;
+  const hireDate = document.getElementById("empHireDate").value;
+
+  if (!id || !name || !email || !position || !department || !hireDate) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  if (!window.db.employees) {
+    window.db.employees = [];
+  }
+
+  const form = document.getElementById("empForm");
+  const editingIndex = form.dataset.editIndex;
+
+  const employeeData = {
+    id,
+    name,
+    email,
+    position,
+    department,
+    hireDate
+  };
+
+  if (editingIndex !== undefined && editingIndex !== "") {
+    window.db.employees[editingIndex] = employeeData;
+    form.dataset.editIndex = "";
+  } else {
+    window.db.employees.push(employeeData);
+  }
+
+  saveToStorage();
+  renderEmployees();
+  form.reset();
 
 function editEmployee(index) {
   const emp = window.db.employees[index];
@@ -202,6 +240,7 @@ function deleteEmployee(index) {
   saveToStorage();
   renderEmployees();
 }
+
 /* =========================
     DEPARTMENT FUNCTIONS  
 ========================= */
@@ -373,6 +412,7 @@ function deleteAccount(index) {
   renderAccounts();
 }
 
+
 /* =========================
    DOM LOADED
 ========================= */
@@ -385,14 +425,15 @@ document.addEventListener("DOMContentLoaded", () => {
   updateDepartmentDropdown();
   renderAccounts();
 
+
   const registerForm = document.getElementById("registerForm");
 
   if (registerForm) {
     registerForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const firstname = document.getElementById("firstname").value.trim();
-      const lastname = document.getElementById("lastname").value.trim();
+      const firstname = firstname.value.trim();
+      const lastname = lastname.value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
