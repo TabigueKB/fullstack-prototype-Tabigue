@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,14 +77,14 @@
     </section>
 
     <!-- Verify Email Section -->
-    <section id="verify-email" class="py-5 d-none">
+     <section id="verify-email" class="py-5 d-none">
       <div class="container">
         <h2>Email Verification</h2>
         <p id="verificationMessage"></p>
         <button id="verifyBtn" class="btn btn-success">✅ Simulate Email Verification</button>
       </div>
     </section>
-
+    
     <!-- Login Section -->
     <section id="login" class="py-5 d-none">
       <div class="container mt-5">
@@ -118,28 +119,198 @@
     </section>
 
     <!-- Employees Section -->
-    <section id="employees" class="py-5 d-none">
-      <div class="container mt-5">
-        <h2>Employees</h2>
-        <p>Admin-only section to manage employees.</p>
+<section id="employees" class="py-5 d-none">
+  <div class="container mt-5">
+
+    <!-- Header Row -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Employees</h2>
+      <button class="btn btn-success"
+        onclick="document.getElementById('empForm').reset();">
+        + Add Employee
+      </button>
+    </div>
+
+    <!-- Table -->
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>User Email</th>
+          <th>Position</th>
+          <th>Department</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="employeesTableBody">
+        <tr>
+          <td colspan="6" class="text-center">No employees.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Employee Form Card -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Add/Edit Employee</h5>
+
+        <form id="empForm">
+          <div class="mb-3">
+            <label class="form-label">Employee ID</label>
+            <input type="text" class="form-control" id="empId">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Employee Name</label>
+            <input type="text" class="form-control" id="empName">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">User Email</label>
+            <input type="email" class="form-control" id="empEmail">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Position</label>
+            <input type="text" class="form-control" id="empPosition">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Department</label>
+            <select class="form-select" id="empDepartment">
+              <option value="">Select Department</option>
+              <option>Engineering</option>
+              <option>Human Resources</option>
+              <option>Finance</option>
+              <option>Marketing</option>
+              <option>IT Support</option>
+              <option>Operations</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Hire Date</label>
+            <input type="date" class="form-control" id="empHireDate">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary"
+            onclick="document.getElementById('empForm').reset();">
+            Cancel
+          </button>
+        </form>
+
       </div>
-    </section>
+</section>
+
 
     <!-- Accounts Section -->
-    <section id="accounts" class="py-5 d-none">
-      <div class="container mt-5">
-        <h2>Accounts</h2>
-        <p>Admin-only section to manage user accounts.</p>
-      </div>
-    </section>
+  <section id="departments" class="py-5 d-none">
+  <div class="container mt-5">
 
-    <!-- Departments Section -->
-    <section id="departments" class="py-5 d-none">
-      <div class="container mt-5">
-        <h2>Departments</h2>
-        <p>Admin-only section to manage departments.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Departments</h2>
+      <button class="btn btn-success" onclick="addDepartment()">
+        + Add Department
+      </button>
+    </div>
+
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="departmentsTableBody">
+        <tr>
+          <td colspan="3" class="text-center">No departments.</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</section>
+
+<section id="accounts" class="py-5 d-none">
+  <div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Accounts</h2>
+      <button class="btn btn-success" onclick="resetAccountForm()">
+        + Add Account
+      </button>
+    </div>
+
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Verified</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="accountsTableBody"></tbody>
+    </table>
+
+    <!-- Account Form -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">Add/Edit Account</h5>
+
+        <form id="accountForm">
+          <input type="hidden" id="accountIndex">
+
+          <div class="mb-3">
+            <label>First Name</label>
+            <input type="text" class="form-control" id="accFirstName">
+          </div>
+
+          <div class="mb-3">
+            <label>Last Name</label>
+            <input type="text" class="form-control" id="accLastName">
+          </div>
+
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" class="form-control" id="accEmail">
+          </div>
+
+          <div class="mb-3">
+            <label>Password</label>
+            <input type="password" class="form-control" id="accPassword">
+          </div>
+
+          <div class="mb-3">
+            <label>Role</label>
+            <select class="form-select" id="accRole">
+              <option value="User">User</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="accVerified">
+            <label class="form-check-label">Verified</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary"
+            onclick="resetAccountForm()">Cancel</button>
+        </form>
+
       </div>
-    </section>
+    </div>
+
+  </div>
+</section>
+
+
+
 
     <!-- My Requests Section -->
     <section id="requests" class="py-5 d-none">
@@ -150,6 +321,9 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
   <script src="script.js"></script>
+
 </body>
 </html>
