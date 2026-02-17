@@ -253,7 +253,7 @@ function deleteEmployee(index) {
 }
 
 /* =========================
-    DEPARTMENT FUNCTIONS  
+    DEPARTMENT FUNCTIONS
 ========================= */
 
 function renderDepartments() {
@@ -262,7 +262,7 @@ function renderDepartments() {
 
   tableBody.innerHTML = "";
 
-  if (window.db.departments.length === 0) {
+  if (!window.db.departments || window.db.departments.length === 0) {
     tableBody.innerHTML =
       `<tr><td colspan="3" class="text-center">No departments.</td></tr>`;
     return;
@@ -272,7 +272,7 @@ function renderDepartments() {
     tableBody.innerHTML += `
       <tr>
         <td>${dept.name}</td>
-        <td>—</td>
+        <td>${dept.description || "-"}</td>
         <td>
           <button class="btn btn-sm btn-primary"
             onclick="editDepartment(${index})">Edit</button>
@@ -284,21 +284,37 @@ function renderDepartments() {
   });
 }
 
+function addDepartment() {
+  const name = prompt("Enter Department Name:");
+  if (!name) return;
 
-/* DELETE FUNCTION — OUTSIDE */
-function deleteDepartment(index) {
-  window.db.departments.splice(index, 1);
+  window.db.departments.push({
+    id: Date.now(),
+    name: name,
+    description: ""
+  });
+
   saveToStorage();
   renderDepartments();
   updateDepartmentDropdown();
 }
 
-/* EDIT FUNCTION */
 function editDepartment(index) {
-  const newName = prompt("Edit department name:", window.db.departments[index]);
+  const dept = window.db.departments[index];
+  const newName = prompt("Edit department name:", dept.name);
   if (!newName) return;
 
-  window.db.departments[index] = newName;
+  dept.name = newName;
+
+  saveToStorage();
+  renderDepartments();
+  updateDepartmentDropdown();
+}
+
+function deleteDepartment(index) {
+  if (!confirm("Delete this department?")) return;
+
+  window.db.departments.splice(index, 1);
   saveToStorage();
   renderDepartments();
   updateDepartmentDropdown();
@@ -317,15 +333,6 @@ function updateDepartmentDropdown() {
   });
 }
 
-function addDepartment() {
-  const name = prompt("Enter Department Name:");
-  if (!name) return;
-
-  window.db.departments.push(name);
-  saveToStorage();
-  renderDepartments();
-  updateDepartmentDropdown();
-}
 /* =========================
     ACCOUNT FUNCTIONS  
 ========================= */
@@ -417,7 +424,6 @@ function resetAccountForm() {
   document.getElementById("accountIndex").value = "";
 }
 
-
 function deleteAccount(index) {
   window.db.accounts.splice(index, 1);
   saveToStorage();
@@ -448,27 +454,41 @@ function addItemField(name = "", qty = 1) {
   container.appendChild(div);
 }
 
-
 function renderRequests() {
+
   const tableBody = document.getElementById("requestsTableBody");
   if (!tableBody) return;
 
   const currentUser = window.currentAccount;
-  if (!currentUser) return;
+  if (!currentUser) return;   // ✅ VERY IMPORTANT
 
-  const userRequests = window.db.requests.filter(
-    req => req.employeeEmail === currentUser.email
-  );
+  const actionHeader = document.getElementById("requestActionHeader");
+
+  if (currentUser.role === "Admin") {
+    actionHeader.classList.remove("d-none");
+  } else {
+    actionHeader.classList.add("d-none");
+  }
 
   tableBody.innerHTML = "";
 
-  if (userRequests.length === 0) {
+  let requestsToShow = [];
+
+  if (currentUser.role === "Admin") {
+    requestsToShow = window.db.requests;
+  } else {
+    requestsToShow = window.db.requests.filter(
+      req => req.employeeEmail === currentUser.email
+    );
+  }
+
+  if (requestsToShow.length === 0) {
     tableBody.innerHTML =
-      `<tr><td colspan="4" class="text-center">No requests yet.</td></tr>`;
+      `<tr><td colspan="5" class="text-center">No requests yet.</td></tr>`;
     return;
   }
 
-  userRequests.forEach(req => {
+  requestsToShow.forEach((req, index) => {
 
     let badgeClass = "secondary";
     if (req.status === "Pending") badgeClass = "warning";
@@ -483,13 +503,40 @@ function renderRequests() {
         <td>${req.type}</td>
         <td>${itemsText}</td>
         <td><span class="badge bg-${badgeClass}">${req.status}</span></td>
+        ${
+          currentUser.role === "Admin"
+            ? `<td>
+                 <button class="btn btn-sm btn-success"
+                   onclick="approveRequest(${index})">Approve</button>
+                 <button class="btn btn-sm btn-danger"
+                   onclick="rejectRequest(${index})">Reject</button>
+               </td>`
+            : ""
+        }
       </tr>
     `;
   });
 }
 
+function approveRequest(index) {
+  window.db.requests[index].status = "Approved";
+  saveToStorage();
+  renderRequests();
+}
+
+function rejectRequest(index) {
+  window.db.requests[index].status = "Rejected";
+  saveToStorage();
+  renderRequests();
+}
+
 function saveRequest(e) {
   e.preventDefault();
+
+  if (!window.currentAccount) {
+    alert("You must be logged in.");
+    return;
+  }
 
   const type = document.getElementById("requestType").value;
   const itemNames = document.querySelectorAll(".item-name");
@@ -516,19 +563,13 @@ function saveRequest(e) {
     return;
   }
 
- if (!window.currentAccount) {
-  alert("You must be logged in.");
-  return;
-}
-
-window.db.requests.push({
-  type,
-  items,
-  status: "Pending",
-  date: new Date().toLocaleDateString(),
-  employeeEmail: window.currentAccount.email
-});
-
+  window.db.requests.push({
+    type,
+    items,
+    status: "Pending",
+    date: new Date().toLocaleDateString(),
+    employeeEmail: window.currentAccount.email
+  });
 
   saveToStorage();
   renderRequests();
@@ -536,8 +577,14 @@ window.db.requests.push({
   document.getElementById("requestForm").reset();
   document.getElementById("itemsContainer").innerHTML = "";
 
-  const modal = bootstrap.Modal.getInstance(document.getElementById("requestModal"));
-  modal.hide();
+  const modalEl = document.getElementById("requestModal");
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+
+  alert("Request submitted successfully!");
 }
 
 /* =========================
@@ -551,7 +598,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderDepartments();
   updateDepartmentDropdown();
   renderAccounts();
-
 
   const registerForm = document.getElementById("registerForm");
   const requestForm = document.getElementById("requestForm");
@@ -587,43 +633,44 @@ if (editProfileBtn) {
 }
 
   if (registerForm) {
-    registerForm.addEventListener("submit", function (e) {
-      e.preventDefault();
+  registerForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      const firstname = document.getElementById("firstname").value.trim();
-      const lastname = document.getElementById("lastname").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+    const firstname = document.getElementById("firstname").value.trim();
+    const lastname = document.getElementById("lastname").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-      if (!firstname || !lastname || !email || !password) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      const exists = window.db.accounts.some(acc => acc.email === email);
-
-      if (exists) {
-        alert("Email already registered.");
-        return;
-      }
-
-      window.db.accounts.push({
-        firstname,
-        lastname,
-        email,
-        password,
-        role: "User",
-        verified: false
-      });
-
-      saveToStorage();
-      navigateTo("verify-email");
-    });
-     const accountForm = document.getElementById("accountForm");
-      if (accountForm) {
-      accountForm.addEventListener("submit", saveAccount);
+    if (!firstname || !lastname || !email || !password) {
+      alert("Please fill in all fields.");
+      return;
     }
-  }
+
+    const exists = window.db.accounts.some(acc => acc.email === email);
+
+    if (exists) {
+      alert("Email already registered.");
+      return;
+    }
+
+    window.db.accounts.push({
+      firstname,
+      lastname,
+      email,
+      password,
+      role: "User",
+      verified: false
+    });
+
+    saveToStorage();
+    navigateTo("verify-email");
+  });
+}
+
+const accountForm = document.getElementById("accountForm");
+if (accountForm) {
+  accountForm.addEventListener("submit", saveAccount);
+}
 
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
@@ -656,6 +703,7 @@ if (requestModal) {
     addItemField(); // automatically add first field
   });
 }
+
   /* =========================
    EMAIL VERIFICATION
 ========================= */
@@ -687,6 +735,7 @@ if (verifyBtn) {
     navigateTo("login");
   });   
 }
+
   const empForm = document.getElementById("empForm");
   if (empForm) {
     empForm.addEventListener("submit", function (e) {
