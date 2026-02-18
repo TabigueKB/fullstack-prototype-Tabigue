@@ -27,6 +27,9 @@ function navigateTo(sectionId) {
 if (sectionId === "requests") {
   renderRequests();
 }
+if (sectionId === "accounts") {
+  renderAccounts();
+}
 
 }
 
@@ -628,11 +631,7 @@ if (editProfileBtn) {
   });
 }
 
-  if (requestForm) {
-  requestForm.addEventListener("submit", saveRequest);
-}
-
-  if (registerForm) {
+ if (registerForm) {
   registerForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -663,9 +662,14 @@ if (editProfileBtn) {
     });
 
     saveToStorage();
+
+    // ✅ Update accounts table
+    renderAccounts();
+
     navigateTo("verify-email");
   });
 }
+
 
 const accountForm = document.getElementById("accountForm");
 if (accountForm) {
@@ -711,30 +715,26 @@ const verifyBtn = document.getElementById("verifyBtn");
 
 if (verifyBtn) {
   verifyBtn.addEventListener("click", () => {
-
-    // Get last registered account
     const lastAccount = window.db.accounts[window.db.accounts.length - 1];
-
     if (!lastAccount) {
       alert("No account to verify.");
       return;
     }
 
     lastAccount.verified = true;
-
     saveToStorage();
 
-    alert("Email successfully verified! You can now login.");
+    // ✅ Update accounts table so the new account shows verified
+    renderAccounts();
 
-    // Show login alert message
+    alert("Email successfully verified! You can now login.");
     const loginAlert = document.getElementById("loginAlert");
-    if (loginAlert) {
-      loginAlert.classList.remove("d-none");
-    }
+    if (loginAlert) loginAlert.classList.remove("d-none");
 
     navigateTo("login");
-  });   
+  });
 }
+
 
   const empForm = document.getElementById("empForm");
   if (empForm) {
