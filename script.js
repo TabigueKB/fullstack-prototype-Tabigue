@@ -751,7 +751,7 @@ function togglePassword(inputId, iconElement) {
 
   if (input.type === "password") {
     input.type = "text";
-    iconElement.textContent = "🙈";
+    iconElement.textContent = "⌣";
   } else {
     input.type = "password";
     iconElement.textContent = "👁";
