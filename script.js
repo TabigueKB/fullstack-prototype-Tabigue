@@ -114,7 +114,7 @@ function loadFromStorage() {
       firstname: "Admin",
       lastname: "User",
       email: "admin@example.com",
-      password: "123456789",
+      password: "Password123!",
       verified: true,
       role: "Admin"
     });
@@ -736,6 +736,7 @@ if (verifyBtn) {
 }
 
 
+
   const empForm = document.getElementById("empForm");
   if (empForm) {
     empForm.addEventListener("submit", function (e) {
@@ -744,3 +745,15 @@ if (verifyBtn) {
     });
   }
 });
+
+function togglePassword(inputId, iconElement) {
+  const input = document.getElementById(inputId);
+
+  if (input.type === "password") {
+    input.type = "text";
+    iconElement.textContent = "🙈";
+  } else {
+    input.type = "password";
+    iconElement.textContent = "👁";
+  }
+}
