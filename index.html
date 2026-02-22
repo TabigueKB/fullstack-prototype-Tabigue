@@ -67,7 +67,10 @@
           </div>
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
+            <div class="password-wrapper">
             <input type="password" class="form-control" id="password" placeholder="Enter your password">
+            <span class="toggle-password" onclick="togglePassword('password', this)">👁</span>
+            </div>
           </div>
           <button type="submit" class="btn btn-success">Sign Up</button>
           <button type="button" class="btn btn-secondary" onclick="navigateTo('home')">Cancel</button>
@@ -98,7 +101,10 @@
           </div>
           <div class="mb-3">
             <label for="loginPassword" class="form-label">Password</label>
+            <div class="password-wrapper">
             <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password">
+            <span class="toggle-password" onclick="togglePassword('loginPassword', this)">👁</span>
+              </div>
           </div>
           <button type="submit" class="btn btn-primary">Login</button>
           <button type="button" class="btn btn-secondary" onclick="navigateTo('home')">Cancel</button>
@@ -282,9 +288,12 @@
 
           <div class="mb-3">
             <label>Password</label>
+            <div class="password-wrapper">
             <input type="password" class="form-control" id="accPassword">
+           <span class="toggle-password" onclick="togglePassword('accPassword', this)">👁</span>
+            </div>
           </div>
-
+          
           <div class="mb-3">
             <label>Role</label>
             <select class="form-select" id="accRole">
