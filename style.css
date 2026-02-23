@@ -5,7 +5,7 @@
 body {
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f7cac9, #ffffff, #92c2ec);
+  background: linear-gradient(#fffcfc);
   background-attachment: fixed;
   color: #333;
   animation: fadeInBody 1s ease;
@@ -19,7 +19,7 @@ body {
 
 /* ========== NAVBAR ========== */
 .navbar {
-  background: linear-gradient(to right, #f7cac9, #92c2ec) !important;
+  background: linear-gradient(#011C40) !important;
   box-shadow: 0 5px 20px rgba(0,0,0,0.08);
 }
 
@@ -59,7 +59,7 @@ section .container {
 h1, h2 {
   font-weight: 600;
   letter-spacing: 1px;
-  color: #444;
+  color: #000000;
 }
 
 /* ========== BUTTONS ========== */
@@ -72,11 +72,11 @@ h1, h2 {
 }
 
 .btn-primary {
-  background: linear-gradient(45deg, #f7cac9, #92c2ec);
+  background: linear-gradient(45deg, #011C40);
 }
 
 .btn-success {
-  background: linear-gradient(45deg, #92c2ec, #f7cac9);
+  background: linear-gradient(45deg, #011C40);
 }
 
 .btn-secondary {
@@ -101,12 +101,12 @@ h1, h2 {
 table {
   border-radius: 15px;
   overflow: hidden;
-  background: white;
+  background: rgb(0, 0, 0);
 }
 
 thead {
-  background: linear-gradient(45deg, #f7cac9, #92c2ec);
-  color: white;
+  background: linear-gradient(45deg, #011C40, #ffff);
+  color: rgb(0, 0, 0);
   font-weight: 500;
 }
 
@@ -175,7 +175,7 @@ tbody tr:hover {
 }
 
 .dropdown-item:hover {
-  background: linear-gradient(45deg, #f7cac9, #92c2ec);
+  background: linear-gradient(45deg, #011C40, #ffff);
   color: white;
 }
 
@@ -185,7 +185,7 @@ tbody tr:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(#f7cac9, #92c2ec);
+  background: linear-gradient(#011C40, #ffff);
   border-radius: 10px;
 }
 
