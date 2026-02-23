@@ -603,8 +603,12 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAccounts();
 
   const registerForm = document.getElementById("registerForm");
-  const requestForm = document.getElementById("requestForm");
   const editProfileBtn = document.getElementById("editProfileBtn");
+  const requestForm = document.getElementById("requestForm");
+  
+  if (requestForm) {
+  requestForm.addEventListener("submit", saveRequest);
+}
 
 if (editProfileBtn) {
   editProfileBtn.addEventListener("click", () => {
