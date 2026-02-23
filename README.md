@@ -1,1 +1,1 @@
- # creating a fullstack prototype using html, css, and javascript
+ # Creating a fullstack prototype using html, css, and javascript.
