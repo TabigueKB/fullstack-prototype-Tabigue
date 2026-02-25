@@ -7,7 +7,7 @@ body {
   min-height: 100vh;
   background: linear-gradient(#fffcfc);
   background-attachment: fixed;
-  color: #333;
+  color: #000000;
   animation: fadeInBody 1s ease;
 }
 
@@ -42,11 +42,11 @@ body {
 
 /* ========== SECTION CARDS ========== */
 section .container {
-  background: rgba(255,255,255,0.65);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.40);
   animation: fadeUp 0.6s ease;
 }
 
@@ -85,7 +85,7 @@ h1, h2 {
 }
 
 .btn-danger {
-  background: linear-gradient(45deg, #ff6b6b, #ff8787);
+  background: linear-gradient(45deg, #f56f6f, #f56f6f);
 }
 
 .btn-warning {
@@ -101,7 +101,7 @@ h1, h2 {
 table {
   border-radius: 15px;
   overflow: hidden;
-  background: rgb(0, 0, 0);
+  background: rgb(255, 255, 255);
 }
 
 thead {
@@ -115,7 +115,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8f9fa;
+  background: #fffefe;
   transform: scale(1.01);
 }
 
@@ -130,8 +130,8 @@ tbody tr:hover {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #92c2ec;
-  box-shadow: 0 0 10px rgba(146,194,236,0.4);
+  border-color: #000000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.40);
 }
 
 /* ========== CARDS ========== */
@@ -190,7 +190,7 @@ tbody tr:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #011C40, #ffff;
 }
 
 /* PASSWORD TOGGLE */
